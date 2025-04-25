@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>2D Random Walker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #333;
+    }
+
+    #controls {
+      margin: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      font-size: 24px;
+      padding: 10px;
+      border: none;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #ddd;
+    }
+
+    #canvas-container {
+      margin: 20px;
+      border: 4px solid #444;
+      background-color: white;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧭 2D Random Walker</h1>
+  <div id="controls">
+    <button class="btn" id="runBtn">▶️</button>
+    <button class="btn" id="pauseBtn">⏸️</button>
+    <button class="btn" id="resetBtn">🔄</button>
+  </div>
+  <div id="canvas-container">
+    <canvas id="walkerCanvas" width="500" height="500"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('walkerCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const cols = 20;
+    const rows = 20;
+    const cellSize = canvas.width / cols;
+
+    let grid = [];
+    let walker = { x: Math.floor(cols / 2), y: Math.floor(rows / 2) };
+    let interval = null;
+
+    function initGrid() {
+      grid = Array.from({ length: rows }, () => Array(cols).fill(false));
+      walker = { x: Math.floor(cols / 2), y: Math.floor(rows / 2) };
+      drawGrid();
+    }
+
+    function drawGrid() {
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          ctx.fillStyle = grid[y][x] ? 'black' : 'white';
+          ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        }
+      }
+      // Draw the red walker
+      ctx.fillStyle = 'red';
+      ctx.fillRect(walker.x * cellSize, walker.y * cellSize, cellSize, cellSize);
+    }
+
+    function moveWalker() {
+      grid[walker.y][walker.x] = true;
+
+      const directions = [
+        { x: 0, y: -1 },
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+        { x: -1, y: 0 },
+      ];
+
+      const validMoves = directions.filter(dir => {
+        const newX = walker.x + dir.x;
+        const newY = walker.y + dir.y;
+        return newX >= 0 && newX < cols && newY >= 0 && newY < rows;
+      });
+
+      const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+      walker.x += move.x;
+      walker.y += move.y;
+
+      drawGrid();
+    }
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      if (!interval) {
+        interval = setInterval(moveWalker, 50);
+      }
+    });
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      clearInterval(interval);
+      interval = null;
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      clearInterval(interval);
+      interval = null;
+      initGrid();
+    });
+
+    initGrid();
+  </script>
+</body>
+</html>
